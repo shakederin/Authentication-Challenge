@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
-import {signUp, signIn, isTokenIsValide, getNewToken, logOut} from "../controllers/users"
+const {signUp, signIn, isTokenIsValide, getNewToken, logOut} = require("../controllers/users");
 
-router.post("/users/register", signUp)
+router.post("/register", signUp)
 
-router.post("/users/login", signIn)
+router.post("/login", signIn)
 
-router.post("/users/tokenValidate", isTokenIsValide)
+router.post("/tokenValidate", isTokenIsValide)
 
-router.post("/users/token", getNewToken)
+router.post("/token", getNewToken)
 
-router.post("/users/logout", logOut)
+router.post("/logout", logOut)
 
 module.exports = router;

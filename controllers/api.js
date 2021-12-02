@@ -1,8 +1,8 @@
-import { USERS } from "../Database/allData";
 const jwt = require('jsonwebtoken')
+const USERS = require("../Database/allData")
 const SECRET = "G#AKkaja6JALK87LJ8kla8KJ^j654*"
 
-export function getAllUsers(req,res){
+exports.getAllUsers = (req,res)=>{
     const token = req.headers.authorization.substr(7,req.headers.authorization.length-1);
     if(!token){
         res.status(401).send("Access Token Required")
@@ -27,7 +27,7 @@ export function getAllUsers(req,res){
     return;
 }
 
-export function getUserInfo(req,res){
+exports.getUserInfo = (req,res)=>{
     const accessToken = req.headers.authorization.substr(7, req.headers.authorization.length-1);
     if(!accessToken){
         res.status(401).send("Access Token Required"); 

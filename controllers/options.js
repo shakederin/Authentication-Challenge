@@ -1,28 +1,30 @@
 const jwt = require('jsonwebtoken')
+const USERS = require("../Database/allData")
 const SECRET = "G#AKkaja6JALK87LJ8kla8KJ^j654*"
 
-export function returnOptions (req,res){
-    const token = req.headers.authorization.substr(7,req.headers.authorization.length-1);
-    if(!token){
-        res.status(200).set({Allow: "OPTIONS, GET, POST"}).json(options.splice(0,2))
-        return;
-    }
-    jwt.verify(token, SECRET, (err,user)=>{
-        if(err){
-            res.status(200).set({Allow: "OPTIONS, GET, POST"}).json(options.splice(0,3))
-            return;
-        }
-        const userEmail = user.email;
-        for(let user of USERS){
-            if(user.email === userEmail){
-                if(user.isAdmin){
-                    res.status(200).set({Allow: "OPTIONS, GET, POST"}).json(options)
-                    return;
+exports.returnOptions = (req,res)=>{
+    try {
+        const token = req.headers.authorization.substr(7,req.headers.authorization.length-1);
+        jwt.verify(token, SECRET, (err,user)=>{
+            if(err){   
+                res.status(200).set({Allow: "OPTIONS, GET, POST"}).json(options.slice(0,3))
+                return;
+            }
+            const userEmail = user.email;
+            for(let user of USERS){
+                if(user.email === userEmail){
+                    if(user.isAdmin){           
+                        res.status(200).set({Allow: "OPTIONS, GET, POST"}).json(options)
+                        return;
+                    }
                 }
             }
-        }
-    })
-    res.status(200).set({Allow: "OPTIONS, GET, POST"}).json(options.splice(0,5))
+            res.status(200).set({Allow: "OPTIONS, GET, POST"}).json(options.slice(0,5))
+        })
+    } catch (error) {
+        res.status(200).set({Allow: "OPTIONS, GET, POST"}).json(options.slice(0,2))
+        return;
+    }
 }
 
 const options =[

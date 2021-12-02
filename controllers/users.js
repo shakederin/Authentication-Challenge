@@ -1,9 +1,9 @@
-import { hash as _hash, compare } from "bcrypt";
-import { verify, sign } from 'jsonwebtoken';
+const bcrypt = require("bcrypt");
+const jwt = require ('jsonwebtoken');
 const SECRET = "G#AKkaja6JALK87LJ8kla8KJ^j654*"
-import { USERS, INFORMATION, REFRESHTOKENS } from "../Database/allData";
+const { USERS, INFORMATION, REFRESHTOKENS } = require("../Database/allData");
 
-export async function signUp(req, res){
+exports.signUp = async (req, res)=>{
     const newUserInfo = req.body;
     // check if user exist
     for(let user in USERS){
@@ -21,17 +21,17 @@ export async function signUp(req, res){
     INFORMATION.push({"email":newUserInfo.email, "info":`${newUserInfo.name} info`})
     
     //hash the password
-    const hash = await _hash(newUserInfo.password, 10);
+    const hash = await bcrypt.hash(newUserInfo.password, 10);
     newUserInfo.password = hash;
     USERS.push(newUserInfo);
     res.status(201).send("Register Success")
 }
 
-export async function signIn(req,res){
+exports.signIn = async (req,res)=>{
     const loginInfo = req.body;   
     for(let user in USERS){
         if(USERS[user].email === loginInfo.email){
-            const match = await compare(loginInfo.password, USERS[user].password);
+            const match = await bcrypt.compare(loginInfo.password, USERS[user].password);
             if(!match){
                 res.status(403).send("User or Password incorrect")
                 return;
@@ -56,13 +56,13 @@ export async function signIn(req,res){
     }   
 }
 
-export function isTokenIsValide(req,res){
+exports.isTokenIsValide =(req,res)=>{
     const accessToken = req.headers.authorization.substr(7,req.headers.authorization.length-1);
     if(!accessToken){
         res.status(401).send("Access Token Required")
         return;
     }
-    verify(accessToken, SECRET, (err, user)=>{
+    jwt.verify(accessToken, SECRET, (err, user)=>{
         if(err){
             console.log(err);
             res.status(403).send("Invalid Access Token")
@@ -72,7 +72,7 @@ export function isTokenIsValide(req,res){
     res.send({valid: true})
 }
 
-export function getUserInfo(req,res){
+exports.getUserInfo = (req,res)=>{
     const accessToken = req.headers.authorization.substr(7, req.headers.authorization.length-1);
     if(!accessToken){
         res.status(401).send("Access Token Required"); 
@@ -86,14 +86,14 @@ export function getUserInfo(req,res){
     })
 }
 
-export function getNewToken(req,res){
+exports.getNewToken = (req,res)=>{
     const refreshToken = req.body.token;
     if(!refreshToken){
         res.status(401).send("Refresh Token Required");
         return;
     }
     let userInfo = {};
-    verify(refreshToken, SECRET , (err, user)=>{
+    jwt.verify(refreshToken, SECRET , (err, user)=>{
         if(err){
             res.status(403).send("Invalid Refresh Token");
             return;
@@ -104,7 +104,7 @@ export function getNewToken(req,res){
     res.status(200).json({accessToken:token})
 }
 
-export function logOut(req,res){
+exports.logOut = (req,res)=>{
     const refreshToken = req.body.token;
     if(!refreshToken){
         res.status(400).send("Refresh Token Required");
@@ -121,7 +121,7 @@ export function logOut(req,res){
 
 function createToken(data, secret, exprire){
     if(exprire){
-        return sign(data, secret, {expiresIn : exprire})
+        return jwt.sign(data, secret, {expiresIn : exprire})
     }
-    return sign(data, secret)
+    return jwt.sign(data, secret)
 }
